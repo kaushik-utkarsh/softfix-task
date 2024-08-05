@@ -7,6 +7,14 @@ const jwt = require('jsonwebtoken');
 // Register
 router.post('/register', async (req, res) => {
     const { username, password } = req.body;
+    if (!req.body) {
+        return res.status(400).json({ msg: 'Please enter all fields' });
+    } else if (
+        !username || !password
+    ) {
+        return res.status(400).json({ msg: 'Please enter all fields' });
+    }
+
 
     try {
         const user = await User.findOne({ username });
@@ -18,14 +26,20 @@ router.post('/register', async (req, res) => {
 
         res.status(201).json({ msg: 'User registered successfully' });
     } catch (err) {
-        res.status(500).json({ msg: 'Server error' });
+        res.status(500).json({ msg: err.msg });
     }
 });
 
 // Login
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
-
+    if (!req.body) {
+        return res.status(400).json({ msg: 'Please enter all fields' });
+    } else if (
+        !username || !password
+    ) {
+        return res.status(400).json({ msg: 'Please enter all fields' });
+    }
     try {
         const user = await User.findOne({ username });
         if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
@@ -35,6 +49,15 @@ router.post('/login', async (req, res) => {
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.json({ token });
+    } catch (err) {
+        res.status(500).json({ msg: 'Server error' });
+    }
+});
+
+router.get('/all', async (req, res) => {
+    try {
+        const users = await User.find();
+        res.json(users);
     } catch (err) {
         res.status(500).json({ msg: 'Server error' });
     }
